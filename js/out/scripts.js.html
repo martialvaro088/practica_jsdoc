@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>scripts.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <link type="text/css" rel="stylesheet" href="styles/daybrush.css">
+    <link type="text/css" rel="stylesheet" href="styles/custom.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <meta name="description" content="scripts.js - Documentation"/>
+
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><div class="search"><div class="input-area"><input type="text"/></div><button></button></div><ul class="classes"><li file="task" class="parent"><a href="Task.html">Task</a></li><li file="taskmanager" class="parent"><a href="TaskManager.html">TaskManager</a><h4><a href="TaskManager.html#methods">Methods</a></h4><ul class='methods'><li data-type='method'><a href="TaskManager.html#addTask">addTask</a></li><li data-type='method'><a href="TaskManager.html#getTasks">getTasks</a></li><li data-type='method'><a href="TaskManager.html#removeTask">removeTask</a></li><li data-type='method'><a href="TaskManager.html#toggleTaskCompleted">toggleTaskCompleted</a></li><li data-type='method'><a href="TaskManager.html#updateLocalStorage">updateLocalStorage</a></li></ul></li></ul><ul class="global"><li file="global"  class="parent"><a href="global.html">Global</a><h4><a href="global.html#methods">Methods</a></h4><ul class='methods'><li data-type='method'><a href="global.html#addTask">addTask</a></li><li data-type='method'><a href="global.html#cambiar">cambiar</a></li><li data-type='method'><a href="global.html#deleteTask">deleteTask</a></li><li data-type='method'><a href="global.html#renderTasks">renderTasks</a></li><li data-type='method'><a href="global.html#toggleTaskCompleted">toggleTaskCompleted</a></li><li data-type='method'><a href="global.html#validate">validate</a></li></ul><h4><a href="global.html#members">Members</a></h4><ul class='members'><li data-type='member'><a href="global.html#currentIndex">currentIndex</a></li><li data-type='member'><a href="global.html#images">images</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">scripts.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Clase para representar una tarea.
+ */
+class Task {
+    /**
+     * Constructor de la clase Task.
+     * @param {string} text El texto de la tarea.
+     */
+    constructor(text) {
+        this.text = text;
+        this.completed = false;
+    }
+}
+
+/**
+ * Clase para gestionar las tareas.
+ */
+class TaskManager {
+    /**
+     * Constructor de la clase TaskManager.
+     * Carga las tareas almacenadas en el almacenamiento local, o inicializa una lista vacía si no hay tareas almacenadas.
+     */
+    constructor() {
+        this.tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    }
+
+    /**
+     * Añade una nueva tarea.
+     * @param {string} text El texto de la tarea a añadir.
+     */
+    addTask(text) {
+        const task = new Task(text);
+        this.tasks.push(task);
+        this.updateLocalStorage();
+    }
+
+    /**
+     * Elimina una tarea.
+     * @param {number} index El índice de la tarea a eliminar.
+     */
+    removeTask(index) {
+        this.tasks.splice(index, 1);
+        this.updateLocalStorage();
+    }
+
+    /**
+     * Cambia el estado de completitud de una tarea.
+     * @param {number} index El índice de la tarea cuyo estado se cambiará.
+     */
+    toggleTaskCompleted(index) {
+        this.tasks[index].completed = !this.tasks[index].completed;
+        this.updateLocalStorage();
+    }
+
+    /**
+     * Actualiza el almacenamiento local con las tareas actuales.
+     */
+    updateLocalStorage() {
+        localStorage.setItem('tasks', JSON.stringify(this.tasks));
+    }
+
+    /**
+     * Obtiene todas las tareas.
+     * @returns {Array} Lista de tareas.
+     */
+    getTasks() {
+        return this.tasks;
+    }
+}
+
+// Instancia de la clase TaskManager
+const taskManager = new TaskManager();
+
+/**
+ * Función para añadir una tarea.
+ */
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const text = taskInput.value.trim();
+    if (text) {
+        taskManager.addTask(text);
+        taskInput.value = '';
+        renderTasks();
+    }
+}
+
+/**
+ * Función para eliminar una tarea.
+ * @param {number} index El índice de la tarea a eliminar.
+ */
+function deleteTask(index) {
+    taskManager.removeTask(index);
+    renderTasks();
+}
+
+/**
+ * Función para representar visualmente las tareas.
+ */
+function renderTasks() {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = '';
+    taskManager.getTasks().forEach((task, index) => {
+        const taskEl = document.createElement('li');
+        const taskText = document.createElement('span');
+        taskText.textContent = task.text;
+        taskText.style.flexGrow = '1';
+        if (task.completed) {
+            taskText.style.textDecoration = 'line-through';
+        }
+
+        // Botón para borrar tarea
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Borrar';
+        deleteBtn.onclick = () => deleteTask(index);
+        deleteBtn.style.marginLeft = '10px';
+        deleteBtn.classList.add('buttonB'); // Añadir clase buttonB
+
+        taskEl.appendChild(taskText);
+        taskEl.appendChild(deleteBtn);
+        taskList.appendChild(taskEl);
+    });
+}
+
+/**
+ * Función para cambiar el estado de completitud de una tarea.
+ * @param {number} index El índice de la tarea cuyo estado se cambiará.
+ */
+function toggleTaskCompleted(index) {
+    taskManager.toggleTaskCompleted(index);
+    renderTasks();
+}
+
+// Agrega el evento click al botón de añadir tarea
+document.getElementById('addTaskBtn').addEventListener('click', addTask);
+
+// Representa visualmente las tareas al cargar la página
+renderTasks();
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+<style>
+
+
+nav li[file="scripts"]:after {
+    display: none;
+}
+nav li[file="scripts"] h4, nav li[file="scripts"] ul {
+    display: block;
+}
+</style>
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/daybrush/jsdoc">JSDoc 4.0.2</a> on Fri Feb 23 2024 15:42:23 GMT+0100 (hora estándar de Europa central) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/utils.min.js"></script>
+<script src="scripts/search.js"></script>
+<script src="scripts/custom.js"></script>
+</body>
+</html>
